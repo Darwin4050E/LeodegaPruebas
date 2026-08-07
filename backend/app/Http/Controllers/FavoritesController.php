@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreFavoriteRequest;
+use App\Http\Requests\UpdateFavoriteRequest;
 use App\Models\Favorites;
 use Illuminate\Http\Request;
 
@@ -20,24 +22,12 @@ class FavoritesController extends ApiController
 
     public function store(Request $request)
     {
-        $rules = [
-            'user_id' => 'required|exists:user,id',
-            'store_id' => 'required|exists:storeRooms,id',
-            'save_date' => 'date',
-        ];
-
-        return $this->storeModel($request, Favorites::class, $rules);
+        return $this->storeModel($request, Favorites::class, (new StoreFavoriteRequest)->rules());
     }
 
     public function update(Request $request, $id)
     {
-        $rules = [
-            'user_id' => 'sometimes|required|exists:user,id',
-            'store_id' => 'sometimes|required|exists:storeRooms,id',
-            'save_date' => 'sometimes|required|date',
-        ];
-
-        return $this->updateModel($request, Favorites::class, $id, $rules);
+        return $this->updateModel($request, Favorites::class, $id, (new UpdateFavoriteRequest)->rules());
     }
 
     public function destroy($id)

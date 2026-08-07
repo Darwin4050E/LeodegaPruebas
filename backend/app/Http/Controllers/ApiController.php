@@ -13,7 +13,7 @@ class ApiController extends Controller
     {
         $query = $modelClass::query();
 
-        if (!empty($relations)) {
+        if (! empty($relations)) {
             $query->with($relations);
         }
 
@@ -54,7 +54,7 @@ class ApiController extends Controller
                 $mainItem = $modelClass::create($validated);
 
                 $possibleRelations = collect($request->all())
-                    ->filter(fn($v) => is_array($v))
+                    ->filter(fn ($v) => is_array($v))
                     ->keys();
 
                 foreach ($possibleRelations as $relationName) {
@@ -94,7 +94,7 @@ class ApiController extends Controller
         // Agregar "sometimes" automáticamente
         $rules = array_map(function ($r) {
             if (stripos($r, 'sometimes') === false && stripos($r, 'required') === false) {
-                return 'sometimes|' . $r;
+                return 'sometimes|'.$r;
             }
 
             return $r;

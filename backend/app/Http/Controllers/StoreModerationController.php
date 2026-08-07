@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreStoreModerationRequest;
+use App\Http\Requests\UpdateStoreModerationRequest;
 use App\Models\StoreModeration;
 use Illuminate\Http\Request;
 
@@ -20,26 +22,12 @@ class StoreModerationController extends ApiController
 
     public function store(Request $request)
     {
-        $rules = [
-            'store_id' => 'required|exists:storeRooms,id',
-            'status' => 'required|in:pending,approved,rejected',
-            'reason_rejected' => 'required|string',
-            'moderation_date' => 'sometimes|date',
-        ];
-
-        return $this->storeModel($request, StoreModeration::class, $rules);
+        return $this->storeModel($request, StoreModeration::class, (new StoreStoreModerationRequest)->rules());
     }
 
     public function update(Request $request, $id)
     {
-        $rules = [
-            'store_id' => 'sometimes|exists:storeRooms,id',
-            'status' => 'sometimes|in:pending,approved,rejected',
-            'reason_rejected' => 'required|string',
-            'moderation_date' => 'sometimes|date',
-        ];
-
-        return $this->updateModel($request, StoreModeration::class, $id, $rules);
+        return $this->updateModel($request, StoreModeration::class, $id, (new UpdateStoreModerationRequest)->rules());
     }
 
     public function destroy($id)

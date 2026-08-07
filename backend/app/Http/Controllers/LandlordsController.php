@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreLandlordRequest;
+use App\Http\Requests\UpdateLandlordRequest;
 use App\Models\Landlords;
 use Illuminate\Http\Request;
 
@@ -20,22 +22,12 @@ class LandlordsController extends ApiController
 
     public function store(Request $request)
     {
-        $rules = [
-            'user_id' => 'required|exists:user,id',
-            'optional_company' => 'sometimes|string|max:500|nullable',
-        ];
-
-        return $this->storeModel($request, Landlords::class, $rules);
+        return $this->storeModel($request, Landlords::class, (new StoreLandlordRequest)->rules());
     }
 
     public function update(Request $request, $id)
     {
-        $rules = [
-            'user_id' => 'sometimes|required|exists:user,id',
-            'optional_company' => 'sometimes|required|string|max:500|nullable',
-        ];
-
-        return $this->updateModel($request, Landlords::class, $id, $rules);
+        return $this->updateModel($request, Landlords::class, $id, (new UpdateLandlordRequest)->rules());
     }
 
     public function destroy($id)

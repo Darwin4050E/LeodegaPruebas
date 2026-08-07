@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePaymentRequest;
+use App\Http\Requests\UpdatePaymentRequest;
 use App\Models\Payments;
 use Illuminate\Http\Request;
 
@@ -19,26 +21,12 @@ class PaymentsController extends ApiController
 
     public function store(Request $request)
     {
-        $rules = [
-            'reservation_id' => 'required|exists:reservations,id',
-            'payment_method' => 'required|in:credit card,debit card',
-            'payment_state' => 'required|in:paid,pending,failed',
-            'payment_date' => 'date',
-        ];
-
-        return $this->storeModel($request, Payments::class, $rules);
+        return $this->storeModel($request, Payments::class, (new StorePaymentRequest)->rules());
     }
 
     public function update(Request $request, $id)
     {
-        $rules = [
-            'reservation_id' => 'sometimes|exists:reservations,id',
-            'payment_method' => 'sometimes|in:credit card,debit card',
-            'payment_state' => 'sometimes|in:paid,pending,failed',
-            'payment_date' => 'sometimes|date',
-        ];
-
-        return $this->updateModel($request, Payments::class, $id, $rules);
+        return $this->updateModel($request, Payments::class, $id, (new UpdatePaymentRequest)->rules());
     }
 
     public function destroy($id)

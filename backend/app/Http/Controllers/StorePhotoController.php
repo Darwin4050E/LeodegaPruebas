@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreStorePhotoRequest;
 use App\Models\StorePhoto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,11 +23,8 @@ class StorePhotoController extends ApiController
 
     public function store(Request $request, $storeRoomId)
     {
-     
-        $validator = Validator::make($request->all(),[
-            'photos' => 'required|array|min:1',
-            'photos.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
-        ]);
+
+        $validator = Validator::make($request->all(), (new StoreStorePhotoRequest)->rules());
 
         if ($validator->fails()) {
             return response()->json([
@@ -54,7 +52,7 @@ class StorePhotoController extends ApiController
         ], 201);
     }
 
-    public function update(Request $request, $id)
+    public function update()
     {
         return response()->json([
             'message' => 'Para actualizar una foto, elimina y vuelve a subir',
@@ -65,7 +63,7 @@ class StorePhotoController extends ApiController
     {
         $photo = StorePhoto::find($id);
 
-        if (!$photo) {
+        if (! $photo) {
             return response()->json([
                 'message' => 'Item not found',
             ], 404);

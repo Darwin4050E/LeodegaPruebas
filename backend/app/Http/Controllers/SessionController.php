@@ -36,18 +36,16 @@ class SessionController extends Controller
         $currentToken = $user->currentAccessToken();
 
         // para cerrar
-        if ($currentToken && (int)$tokenId === $currentToken->id) {
+        if ($currentToken && (int) $tokenId === $currentToken->id) {
             return response()->json([
-                'message' => 'No puedes cerrar la sesión actual desde aquí.'
+                'message' => 'No puedes cerrar la sesión actual desde aquí.',
             ], 422);
         }
 
         $deleted = $user->tokens()->where('id', $tokenId)->delete();
 
         return response()->json([
-            'message' => $deleted ? 'Sesión cerrada.' : 'Sesión no encontrada.'
+            'message' => $deleted ? 'Sesión cerrada.' : 'Sesión no encontrada.',
         ]);
     }
-
-    
 }
