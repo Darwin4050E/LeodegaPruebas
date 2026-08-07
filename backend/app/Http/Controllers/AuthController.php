@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RegisterRequest;
 use App\Models\User;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    public function login(Request $request, AuthService $authService)
     {
         try {
             $request->validate([
@@ -28,24 +28,7 @@ class AuthController extends Controller
             $user = User::where('email', $request->email)
                 ->with(['landlord:id,user_id,optional_company', 'tenant:id,user_id,search_preference'])
                 ->firstOrFail();
-            $tokenResult = $user->createToken('auth_token');
-            $token = $tokenResult->plainTextToken;
-
-            // Guardar metadata solo si existe token y columnas
-            try {
-                $latestToken = $user->tokens()->latest('id')->first();
-                if ($latestToken) {
-                    $latestToken->ip_address = $request->ip();
-                    $latestToken->user_agent = $request->userAgent();
-                    $latestToken->save();
-                }
-            } catch (\Throwable $e) {
-                Log::warning('No se pudo guardar metadata del token', [
-                    'error' => $e->getMessage(),
-                ]);
-            }
-
-
+            $token = $authService->issueTokenFor($user, $request);
 
             return response()->json([
                 'status' => 'success',
@@ -79,15 +62,9 @@ class AuthController extends Controller
         ], 200);
     }
 
-    public function register(Request $request)
+    public function register(RegisterRequest $request, AuthService $authService)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'lastname' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6',
-        ]);
+        $validated = $request->validated();
 
         $user = User::create([
             'name' => $validated['name'],
@@ -97,20 +74,7 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
         // ya con token de acceso
-        $tokenResult = $user->createToken('auth_token');
-        $token = $tokenResult->plainTextToken;
-        try {
-            $latestToken = $user->tokens()->latest('id')->first();
-            if ($latestToken) {
-                $latestToken->ip_address = $request->ip();
-                $latestToken->user_agent = $request->userAgent();
-                $latestToken->save();
-            }
-        } catch (\Throwable $e) {
-            Log::warning('No se pudo guardar metadata del token', [
-                'error' => $e->getMessage(),
-            ]);
-        }
+        $token = $authService->issueTokenFor($user, $request);
 
         return response()->json([
             'status' => 'success',

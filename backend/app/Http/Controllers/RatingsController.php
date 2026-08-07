@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\DuplicateRatingException;
+use App\Http\Requests\StoreRatingRequest;
+use App\Http\Requests\UpdateRatingRequest;
 use App\Models\Ratings;
+use App\Services\RatingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,7 +16,7 @@ class RatingsController extends ApiController
     {
         $storeId = $request->query('store_id');
 
-        if (!$storeId) {
+        if (! $storeId) {
             return response()->json(['message' => 'store_id requerido'], 400);
         }
 
@@ -30,52 +34,31 @@ class RatingsController extends ApiController
         return $this->showModel(Ratings::class, $id);
     }
 
-    public function store(Request $request)
+    public function store(StoreRatingRequest $request, RatingsService $ratingsService)
     {
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'No autenticado'], 401);
         }
 
-        $validated = $request->validate([
-            'store_id' => 'required|exists:storeRooms,id',
-            'stars' => 'required|integer|between:1,5',
-            'comment' => 'required|string',
-        ]);
-
-        $alreadyRated = Ratings::where('store_id', $validated['store_id'])
-            ->where('user_id', $user->id)
-            ->exists();
-
-        if ($alreadyRated) {
+        try {
+            $rating = $ratingsService->create($user, $request->validated());
+        } catch (DuplicateRatingException) {
             return response()->json([
-                'message' => 'Ya calificaste esta bodega'
+                'message' => 'Ya calificaste esta bodega',
             ], 409);
         }
 
-        $rating = Ratings::create([
-            'store_id' => $validated['store_id'],
-            'user_id' => $user->id,
-            'stars' => $validated['stars'],
-            'comment' => $validated['comment'],
-        ]);
-
         return response()->json([
             'message' => 'Rating creado correctamente',
-            'rating' => $rating
+            'rating' => $rating,
         ], 201);
     }
 
     public function update(Request $request, $id)
     {
-        $rules = [
-            'store_id' => 'sometimes|exists:storeRooms,id',
-            'stars' => 'sometimes|integer|between:1,5',
-            'comment' => 'sometimes|string',
-        ];
-
-        return $this->updateModel($request, Ratings::class, $id, $rules);
+        return $this->updateModel($request, Ratings::class, $id, (new UpdateRatingRequest)->rules());
     }
 
     public function destroy($id)
