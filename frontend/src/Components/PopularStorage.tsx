@@ -1,17 +1,17 @@
 import { Heart, Star, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
+import { getStoreRooms, type StoreRoomSummary } from "../services/storeRooms";
 
 const PopularStorage = () => {
   const navigate = useNavigate();
-  const [bodegas, setBodegas] = useState<any[]>([]);
+  const [bodegas, setBodegas] = useState<StoreRoomSummary[]>([]);
 
   useEffect(() => {
-    api.get("/storeRooms")
+    getStoreRooms()
       .then(res => {
         const approved = res.data.filter(
-          (bodega:any)=> bodega.publication_status === "approved"
+          (bodega: StoreRoomSummary) => bodega.publication_status === "approved"
         )
 
         const topRated = [...approved]

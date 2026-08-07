@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Filter, RotateCcw } from 'lucide-react';
-import api from '../api/axios';
+import { getReports } from '../services/reports';
+import type { ReportListItem } from '../services/reports';
 import SolicitudNueva from './SolicitudNueva';
 import SolicitudRevisarResponder from './SolicitudRevisarResponder';
 import SolicitudRechazada from './SolicitudRechazada';
@@ -14,7 +15,6 @@ const Solicitudes: React.FC = () => {
     const [filtroFecha, setFiltroFecha] = useState('');
     const [filtroTipo, setFiltroTipo] = useState('');
     const [filtroEstado, setFiltroEstado] = useState('');
-    const [showMobileFilters, setShowMobileFilters] = useState(false);
 
     const [solicitudSeleccionada, setSolicitudSeleccionada] = useState<Solicitud | null>(null);
     const [mostrarSolicitudNueva, setMostrarSolicitudNueva] = useState(false);
@@ -28,9 +28,9 @@ const Solicitudes: React.FC = () => {
     const fetchReports = async () => {
         try {
             setLoading(true);
-            const { data } = await api.get('/reports');
+            const { data } = await getReports();
 
-            const mapped: Solicitud[] = data.map((r: any) => ({
+            const mapped: Solicitud[] = data.map((r: ReportListItem) => ({
                 id: r.id,
                 nombre: r.user?.name ?? 'Usuario desconocido',
                 email: r.user?.email ?? '',
@@ -94,7 +94,6 @@ const Solicitudes: React.FC = () => {
         setFiltroTipo('');
         setFiltroEstado('');
         setSearchTerm('');
-        setShowMobileFilters(false);
     };
 
     // =========================

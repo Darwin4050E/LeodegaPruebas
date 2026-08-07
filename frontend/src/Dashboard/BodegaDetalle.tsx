@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, MapPin, MoveLeft, Share2 } from 'lucide-react';
+import { MapPin, MoveLeft } from 'lucide-react';
 import BodegaModal from './BodegaModal';
-import api from '../api/axios';
+import { getStoreRoomDetail, type StoreRoomDetail } from '../services/storeRooms';
 
 interface BodegaDetalleProps {
     bodega: { id: number };
@@ -11,10 +11,10 @@ interface BodegaDetalleProps {
 
 
 const BodegaDetalle: React.FC<BodegaDetalleProps> = ({ bodega, onVolver }) => {
-    const [detalle, setDetalle] = useState<any>(null);
+    const [detalle, setDetalle] = useState<StoreRoomDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [mostrarModal, setMostrarModal] = useState(false);
-    const [activeImage, setActiveImage] = useState<string | null>(null);
+    const [, setActiveImage] = useState<string | null>(null);
 
 
     const securityLabels: Record<string, string> = {
@@ -41,7 +41,7 @@ const BodegaDetalle: React.FC<BodegaDetalleProps> = ({ bodega, onVolver }) => {
     useEffect(() => {
         const fetchDetalle = async () => {
             try {
-                const { data } = await api.get(`/store-rooms/${bodega.id}/detail`);
+                const { data } = await getStoreRoomDetail(bodega.id);
                 setDetalle(data);
                 setActiveImage(data.photos?.[0] || null);
 
@@ -182,7 +182,7 @@ const BodegaDetalle: React.FC<BodegaDetalleProps> = ({ bodega, onVolver }) => {
 
                         {/* Seguridad dinámica */}
                         {Object.entries(securityData)
-                            .filter(([_, value]) => value === true)
+                            .filter(([, value]) => value === true)
                             .map(([key]) => (
                                 <div
                                     key={key}

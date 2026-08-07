@@ -4,20 +4,40 @@ import ProgressBar from "./ProgressBar";
 import FooterNav from "./FooterNav";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-// @ts-ignore
+// @ts-expect-error - leaflet ships no type declarations in this project
 import L from "leaflet";
 import axios from "axios";
 import leodegalogo from '../../img/LOGO_LEODEGAISO.png';
 
-const AnyMapContainer = MapContainer as any;
-const AnyTileLayer = TileLayer as any;
-const AnyMarker = Marker as any;
+const AnyMapContainer = MapContainer;
+const AnyTileLayer = TileLayer;
+const AnyMarker = Marker;
 
 const markerIcon = new L.Icon({
   iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
   iconSize: [30, 45],
   iconAnchor: [15, 45],
 });
+
+interface NominatimAddress {
+  city?: string;
+  town?: string;
+  village?: string;
+  county?: string;
+  state?: string;
+  region?: string;
+  state_district?: string;
+  province?: string;
+  suburb?: string;
+}
+
+interface NominatimSuggestion {
+  place_id: number;
+  lat: string;
+  lon: string;
+  display_name: string;
+  address?: NominatimAddress;
+}
 
 interface FlyToProps {
   position: [number, number];
@@ -39,20 +59,20 @@ interface LocationMarkerProps {
 
 function LocationMarker({ position, setPosition, onLocationSelected }: Readonly<LocationMarkerProps>) {
   useMapEvents({
-    click: (e: any) => {
+    click: (e: { latlng: { lat: number; lng: number } }) => {
       const { lat, lng } = e.latlng;
       setPosition([lat, lng]);
       onLocationSelected(lat, lng);
     },
   });
-  return <AnyMarker position={position as any} icon={markerIcon as any} />;
+  return <AnyMarker position={position} icon={markerIcon} />;
 }
 
 const PreguntaInicio4: React.FC = () => {
   const navigate = useNavigate();
   const [position, setPosition] = useState<[number, number]>([-0.1807, -78.4678]); // Quito
   const [search, setSearch] = useState("");
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<NominatimSuggestion[]>([]);
 
 
   useEffect(() => {
@@ -92,7 +112,7 @@ const PreguntaInicio4: React.FC = () => {
     if (query.length < 3) return setSuggestions([]);
 
     try {
-      const res = await axios.get(
+      const res = await axios.get<NominatimSuggestion[]>(
         `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=ec&q=${encodeURIComponent(query)}`
       );
       setSuggestions(res.data);

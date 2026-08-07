@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Filter, RotateCcw } from 'lucide-react';
-import api from '../api/axios';
+import { getReports } from '../services/reports';
+import type { ReportListItem } from '../services/reports';
 import SolicitudNueva from './SolicitudNueva';
 import SolicitudRevisarResponder from './SolicitudRevisarResponder';
 import SolicitudRechazada from './SolicitudRechazada';
@@ -14,10 +15,9 @@ const Reportes: React.FC = () => {
     const [filtroFecha, setFiltroFecha] = useState('');
     const [filtroTipo, setFiltroTipo] = useState('');
     const [filtroEstado, setFiltroEstado] = useState('');
-    const [showMobileFilters, setShowMobileFilters] = useState(false);
 
     const [solicitudSeleccionada, setSolicitudSeleccionada] = useState<Solicitud | null>(null);
-    const [reporteSeleccionado, setReporteSeleccionado] = useState<ReporteDetalle | null>(null);
+    const [reporteSeleccionado] = useState<ReporteDetalle | null>(null);
     const [mostrarSolicitudNueva, setMostrarSolicitudNueva] = useState(false);
     const [mostrarRevisarResponder, setMostrarRevisarResponder] = useState(false);
     const [mostrarSolicitudRechazada, setMostrarSolicitudRechazada] = useState(false);
@@ -29,9 +29,9 @@ const Reportes: React.FC = () => {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const { data } = await api.get('/reports');
+                const { data } = await getReports();
 
-                const mapped: Solicitud[] = data.map((r: any) => ({
+                const mapped: Solicitud[] = data.map((r: ReportListItem) => ({
                     id: r.id,
                     nombre: r.user?.name ?? 'Usuario desconocido',
                     direccion: r.store?.direction ?? 'Sin dirección',
@@ -90,7 +90,6 @@ const Reportes: React.FC = () => {
         setFiltroTipo('');
         setFiltroEstado('');
         setSearchTerm('');
-        setShowMobileFilters(false);
     };
 
     // =========================

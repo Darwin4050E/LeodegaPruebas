@@ -1,11 +1,11 @@
 import {
-  AlertTriangle, Building, Calendar, Clock, User, CheckCircle2,
+  AlertTriangle, Building, Calendar, User, CheckCircle2,
   XCircle,
 } from "lucide-react";
 import React, { useEffect } from 'react';
 import type { Solicitud, ReporteDetalle } from './Interfaces/SolicitudesData';
 import { useState } from 'react';
-import api from "../api/axios";
+import { getReport } from "../services/reports";
 
 
 interface SolicitudNuevaProps {
@@ -65,7 +65,7 @@ const SolicitudNueva: React.FC<SolicitudNuevaProps> = ({ solicitud, onVolver, on
 
     (async () => {
 
-      const res = await api.get(`/reports/${datosCompletos.id}`);
+      const res = await getReport(datosCompletos.id);
       const detalle = res.data?.report ?? res.data;
       setReporte(detalle);
 
@@ -102,9 +102,6 @@ const SolicitudNueva: React.FC<SolicitudNuevaProps> = ({ solicitud, onVolver, on
 
 
 
-              {"tiempoTranscurrido" in (datosCompletos as any) && (datosCompletos as any).tiempoTranscurrido ? (
-                <p className="text-gray-500 text-sm">{(datosCompletos as any).tiempoTranscurrido}</p>
-              ) : null}
             </div>
           </div>
         </div>
@@ -139,9 +136,9 @@ const SolicitudNueva: React.FC<SolicitudNuevaProps> = ({ solicitud, onVolver, on
               <div className="border-t border-gray-300 my-4"></div>
 
 
-              {"email" in (datosCompletos as any) && (datosCompletos as any).email ? (
+              {datosCompletos.email ? (
                 <div className="text-sm text-gray-600 break-all">
-                  {(datosCompletos as any).email}
+                  {datosCompletos.email}
                 </div>
               ) : (
                 <div className="text-xs text-gray-500">

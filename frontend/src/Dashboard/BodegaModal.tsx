@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { X, CheckCircle, MapPin, Calendar, Building } from 'lucide-react';
-import bodega1 from '../img/Bodega1.jpg';
-import api from '../api/axios';
+import { getStoreRoomDetail, updateStoreRoom, type StoreRoomDetail } from '../services/storeRooms';
 
 
 interface BodegaModalProps {
@@ -14,7 +13,7 @@ interface BodegaModalProps {
 
 const BodegaModal: React.FC<BodegaModalProps> = ({ isOpen, onClose, storeId }) => {
 
-    const [detalle, setDetalle] = useState<any>(null);
+    const [detalle, setDetalle] = useState<StoreRoomDetail | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -23,7 +22,7 @@ const BodegaModal: React.FC<BodegaModalProps> = ({ isOpen, onClose, storeId }) =
         const fetchDetalle = async () => {
             try {
                 setLoading(true);
-                const { data } = await api.get(`/store-rooms/${storeId}/detail`);
+                const { data } = await getStoreRoomDetail(storeId);
                 setDetalle(data);
             } catch (error) {
                 console.error('Error cargando detalle de bodega', error);
@@ -37,7 +36,7 @@ const BodegaModal: React.FC<BodegaModalProps> = ({ isOpen, onClose, storeId }) =
 
     const handleGenerateContract = async () => {
         try {
-            await api.put(`/storeRooms/${storeId}`, {
+            await updateStoreRoom(storeId, {
                 publication_status: 'approved',
             });
 

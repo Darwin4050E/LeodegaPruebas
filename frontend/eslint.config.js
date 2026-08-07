@@ -20,4 +20,15 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    // Los specs de Cypress usan aserciones Chai en forma de getter
+    // (`expect(x).to.exist`, `.to.not.be.empty`) que ESLint interpreta como
+    // una expresión sin efecto porque no conoce los getters de Chai. Es el
+    // mismo caso que resuelve `eslint-plugin-chai-friendly`; en vez de sumar
+    // una dependencia nueva, se apaga la regla solo para estos archivos.
+    files: ['cypress/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-unused-expressions': 'off',
+    },
+  },
 ])

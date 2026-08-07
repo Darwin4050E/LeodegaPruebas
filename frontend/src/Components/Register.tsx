@@ -29,7 +29,7 @@ const Register = () => {
         e.preventDefault();
 
         setError({ phone: "", pass1: "", pass2: "" });
-        let newError = { phone: "", pass1: "", pass2: "" };
+        const newError = { phone: "", pass1: "", pass2: "" };
         let hasError = false;
 
         const phoneRegex = /^[0-9]{10}$/;

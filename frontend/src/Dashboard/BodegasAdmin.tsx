@@ -2,11 +2,9 @@ import { useState, useEffect } from 'react';
 import { Search, ChevronDown } from 'lucide-react';
 import BodegaDetalle from './BodegaDetalle';
 import type { Bodega } from './Interfaces/SolicitudesData';
-import { useNavigate } from 'react-router-dom';
-import api from '../api/axios';
+import { getStoreRooms, type StoreRoomSummary } from '../services/storeRooms';
 
 const BodegasAdmin = () => {
-    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'name'>('newest');
     const [mostrarMenuOrden, setMostrarMenuOrden] = useState(false);
@@ -20,9 +18,9 @@ const BodegasAdmin = () => {
     useEffect(() => {
         const fetchBodegas = async () => {
             try {
-                const { data } = await api.get('/storeRooms');
+                const { data } = await getStoreRooms();
                 
-                const mapped: Bodega[] = data.map((store: any) => ({
+                const mapped: Bodega[] = data.map((store: StoreRoomSummary) => ({
                     id: store.id,
                     nameBodega: store.title,
                     bodega: store.id,
