@@ -72,6 +72,7 @@ const PreguntaInicio4: React.FC = () => {
   const navigate = useNavigate();
   const [position, setPosition] = useState<[number, number]>([-0.1807, -78.4678]); // Quito
   const [search, setSearch] = useState("");
+  const [city, setCity] = useState("");
   const [suggestions, setSuggestions] = useState<NominatimSuggestion[]>([]);
 
 
@@ -80,8 +81,9 @@ const PreguntaInicio4: React.FC = () => {
     if (storedData) {
       const parsed = JSON.parse(storedData);
       if (parsed.location) {
-        const { direction} = parsed.location;
+        const { direction, city: storedCity } = parsed.location;
         setSearch(direction || "");
+        setCity(storedCity || "");
         if (parsed.location.position) {
           setPosition(parsed.location.position);
         }
@@ -90,19 +92,20 @@ const PreguntaInicio4: React.FC = () => {
   }, []);
 
 
-  const saveLocationData = (direction: string, city: string, geographical_zone: string, positionCoords?: [number, number]) => {
+  const saveLocationData = (direction: string, cityValue: string, geographical_zone: string, positionCoords?: [number, number]) => {
     const existingData = JSON.parse(localStorage.getItem("optionData") || "{}");
     const updatedData = {
       ...existingData,
       location: {
         direction,
-        city,
+        city: cityValue,
         geographical_zone,
         position: positionCoords || position
       },
     };
 
     localStorage.setItem("optionData", JSON.stringify(updatedData));
+    setCity(cityValue);
   };
 
 
@@ -218,6 +221,20 @@ const PreguntaInicio4: React.FC = () => {
             )}
           </div>
 
+          <div className="w-full mb-3 text-left">
+            <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+              Ciudad
+            </label>
+            <input
+              id="city"
+              type="text"
+              value={city}
+              onChange={(e) => saveLocationData(search, e.target.value, "")}
+              placeholder="Se completa al elegir una sugerencia o marcar el mapa, o escríbela aquí"
+              className="w-full p-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800 placeholder-gray-400 transition-all"
+            />
+          </div>
+
           <div className="w-full h-[300px] rounded-2xl overflow-hidden shadow-md mb-10 border border-gray-100">
             <AnyMapContainer center={position} zoom={13} className="w-full h-full">
               <AnyTileLayer
@@ -231,7 +248,11 @@ const PreguntaInicio4: React.FC = () => {
 
           <ProgressBar totalSteps={7} activeIndex={3} />
 
-          <FooterNav onBack={() => navigate("/preguntainicio4")} onNext={() => navigate("/preguntainicio5")} />
+          <FooterNav
+            onBack={() => navigate("/preguntainicio3")}
+            onNext={() => navigate("/preguntainicio5")}
+            nextDisabled={!search.trim() || !city.trim()}
+          />
         </div>
       </main>
     </div>

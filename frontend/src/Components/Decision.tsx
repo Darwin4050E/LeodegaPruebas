@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { registerUser } from "../services/users";
+import { asApiError } from "../api/errors";
 import leodegalogo from '../img/LOGO_LEODEGAISO.png';
 import arrendador from '../img/arrendador.png';
 import arrendatario from '../img/arrendatario.png';
@@ -47,7 +48,16 @@ const Decision = () => {
         } catch (error) {
             console.log(error);
             setLoading(false);
-            alert("Error al crear la cuenta. Por favor, intente nuevamente.");
+            const apiError = asApiError(error);
+            const firstFieldError = apiError.response?.data?.errors
+                ? Object.values(apiError.response.data.errors)[0]?.[0]
+                : undefined;
+            const message =
+                firstFieldError ||
+                apiError.response?.data?.message ||
+                apiError.response?.data?.error ||
+                "Error al crear la cuenta. Por favor, intente nuevamente.";
+            alert(message);
         }
     }
 

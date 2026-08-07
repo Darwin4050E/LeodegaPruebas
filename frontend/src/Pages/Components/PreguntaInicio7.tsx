@@ -5,6 +5,7 @@ import FooterNav from "./FooterNav";
 import { createStoreRoom, uploadStoreRoomPhotos } from "../../services/storeRooms";
 import { useAuth } from "../../context/useAuth";
 import ModalConfirmacion from "../../Components/ModalConfirmacion";
+import { asApiError } from "../../api/errors";
 import leodegalogo from '../../img/LOGO_LEODEGAISO.png';
 
 const PreguntaInicio7 = () => {
@@ -71,6 +72,11 @@ const PreguntaInicio7 = () => {
 
 
   const handleEnviar = async () => {
+    if (!user?.landlord?.id) {
+      alert("No se encontró tu perfil de arrendador. Vuelve a iniciar sesión e intenta de nuevo.");
+      return;
+    }
+
     try {
       setIsModalOpen(false);
       setIsProcessing(true);
@@ -78,7 +84,7 @@ const PreguntaInicio7 = () => {
       const data = JSON.parse(localStorage.getItem("optionData") || "{}");
 
       const storeRoom = {
-        landlord_id: user?.landlord?.id || "",
+        landlord_id: user.landlord.id,
         room_type: data.step1Data?.selectedOption || "",
         storage_type: data.step2Data?.selectedOption || "",
         direction: data.location?.direction || "",
@@ -118,7 +124,16 @@ const PreguntaInicio7 = () => {
       }
     } catch (error: unknown) {
       console.error("Error al crear la bodega:", error);
-      alert("Error al enviar la solicitud, vuelve a intentar");
+      const apiError = asApiError(error);
+      const firstFieldError = apiError.response?.data?.errors
+        ? Object.values(apiError.response.data.errors)[0]?.[0]
+        : undefined;
+      const message =
+        firstFieldError ||
+        apiError.response?.data?.message ||
+        apiError.response?.data?.error ||
+        "Error al enviar la solicitud, vuelve a intentar";
+      alert(message);
       setIsProcessing(false)
 
     }

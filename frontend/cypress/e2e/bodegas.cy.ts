@@ -9,6 +9,17 @@ describe('TC-F-04: Creación de Bodega', () => {
                 JSON.stringify({ landlord: { id: 1 } })
             )
             win.localStorage.setItem('auth_token', 'fake-token')
+            // El paso 4 exige una dirección/ciudad resuelta (por sugerencia o
+            // clic en el mapa) antes de habilitar "Siguiente"; se precarga
+            // aquí para no depender de la API real de Nominatim en el test.
+            win.localStorage.setItem('optionData', JSON.stringify({
+                location: {
+                    direction: 'Av. Principal 123',
+                    city: 'Guayaquil',
+                    geographical_zone: 'Guayas',
+                    position: [-2.170998, -79.922359],
+                }
+            }))
         })
 
         cy.intercept('POST', '**/storeRooms', {
@@ -48,7 +59,7 @@ describe('TC-F-04: Creación de Bodega', () => {
         }
         cy.contains('Siguiente').click()
 
-        // Paso 4 (mapa – ya tiene Quito por defecto)
+        // Paso 4 (mapa – ubicación precargada en localStorage vía beforeEach)
         cy.contains('Siguiente').click()
 
         // Paso 5 (título)
@@ -99,6 +110,16 @@ describe('TC-F-04: Creación de Bodega', () => {
             cy.visit('/preguntainicio7')
 
             cy.contains('Enviar Solicitud').should('be.disabled')
+        })
+
+        it('No permite avanzar en el paso 4 sin dirección y ciudad', () => {
+            cy.window().then(win => win.localStorage.removeItem('optionData'))
+            cy.visit('/preguntainicio4')
+
+            cy.contains('Siguiente').should('be.disabled')
+
+            cy.get('#city').type('Guayaquil')
+            cy.contains('Siguiente').should('be.disabled')
         })
     })
 
