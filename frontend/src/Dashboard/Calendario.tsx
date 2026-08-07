@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import api from '../api/axios';
+import { getLandlordReservations, type LandlordReservation } from '../services/reservations';
 
 type CalendarEvent = {
     id: number;
@@ -23,11 +23,11 @@ const Calendario = () => {
     useEffect(() => {
         const fetchReservations = async () => {
             try {
-                const { data } = await api.get('/landlord/reservations');
+                const { data } = await getLandlordReservations();
 
                 const calendarEvents: CalendarEvent[] = [];
 
-                data.forEach((reservation: any) => {
+                data.forEach((reservation: LandlordReservation) => {
                     const start = new Date(reservation.start_date);
                     const end = new Date(reservation.end_date);
 
@@ -38,7 +38,7 @@ const Calendario = () => {
                     ) {
                         if (reservation.status !== 'confirmed') return;
 
-                        const roomTitle = reservation.store_rooms?.title ?? 'Bodega';
+                        const roomTitle = reservation.storeRooms?.title ?? 'Bodega';
                         const tenantName = reservation.tenants?.user
                             ? `${reservation.tenants.user.name} ${reservation.tenants.user.lastname}`
                             : 'Arrendatario';
@@ -92,7 +92,7 @@ const Calendario = () => {
         return days;
     };
 
-    const getEventsForDate = (date: any) => {
+    const getEventsForDate = (date: Date) => {
         return events.filter(e =>
             e.date.getDate() === date.getDate() &&
             e.date.getMonth() === date.getMonth() &&
@@ -106,7 +106,7 @@ const Calendario = () => {
         return Array.from({ length: 7 }, (_, i) => new Date(curr.getFullYear(), curr.getMonth(), first + i));
     };
 
-    const navigate = (direction: any) => {
+    const navigate = (direction: number) => {
         const newDate = new Date(currentDate);
         if (view === 'month') {
             newDate.setMonth(currentDate.getMonth() + direction);
@@ -117,7 +117,7 @@ const Calendario = () => {
         }
         setCurrentDate(newDate);
     };
-    const changeView = (newView: any) => {
+    const changeView = (newView: string) => {
         setView(newView);
         if (newView === 'day' || newView === 'week') {
             setCurrentDate(new Date());

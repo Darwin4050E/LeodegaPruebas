@@ -15,12 +15,18 @@ type CalendarEvent = {
     allDay?: boolean;
 };
 
+type CalendarDay = {
+    day: number;
+    isCurrentMonth: boolean;
+    date: Date;
+};
+
 type Reservation = {
     id: number;
     start_date: string;
     end_date: string;
     status: 'confirmed' | 'pending' | 'cancelled';
-    store_rooms?: {
+    storeRooms?: {
         title: string;
     };
 };
@@ -53,7 +59,7 @@ const CalendarioTendant = () => {
             for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
                 evts.push({
                     id: `${res.id}-${d.toISOString()}`,
-                    title: res.store_rooms?.title || 'Reserva',
+                    title: res.storeRooms?.title || 'Reserva',
                     date: new Date(d),
                     hour: 9,
                     allDay: true,
@@ -86,7 +92,7 @@ const CalendarioTendant = () => {
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const startingDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
         const prevMonthDays = new Date(year, month, 0).getDate();
-        const days: any[] = [];
+        const days: CalendarDay[] = [];
 
         for (let i = startingDay - 1; i >= 0; i--) {
             days.push({ day: prevMonthDays - i, isCurrentMonth: false, date: new Date(year, month - 1, prevMonthDays - i) });
