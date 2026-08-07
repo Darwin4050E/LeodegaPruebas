@@ -26,7 +26,8 @@ class Notifications extends Model
         'is_read' => 'boolean',
     ];
 
-    public function sender(){
+    public function sender()
+    {
         return $this->belongsTo(User::class, 'sender_id');
     }
 

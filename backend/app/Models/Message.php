@@ -17,7 +17,7 @@ class Message extends Model
         'is_read',
     ];
 
-     use HasFactory;
+    use HasFactory;
 
     public function sender()
     {

@@ -10,13 +10,13 @@ return new class extends Migration
     {
         Schema::table('payments', function (Blueprint $table) {
             // 1. Agrega la columna 'reservation_id'
-            $table->foreignId('reservation_id')->nullable()->after('id'); 
-            
+            $table->foreignId('reservation_id')->nullable()->after('id');
+
             // 2. Define la clave foránea
             $table->foreign('reservation_id')
-                  ->references('id')
-                  ->on('reservations')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('reservations')
+                ->onDelete('cascade');
         });
     }
 

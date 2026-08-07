@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\StoreRooms;
 use App\Models\Landlords;
+use App\Models\StoreRooms;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class StoreRoomsFactory extends Factory

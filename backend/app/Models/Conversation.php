@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Conversation extends Model
 {
     use HasFactory;
+
     protected $fillable = [];
 
     public function users()
@@ -32,4 +33,3 @@ class Conversation extends Model
             ->where('is_read', false);
     }
 }
-

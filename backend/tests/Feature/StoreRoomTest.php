@@ -2,9 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Landlords;
-use App\Models\StoreRooms;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -19,7 +18,7 @@ class StoreRoomTest extends TestCase
     {
         $user = User::factory()->create(['role' => 'landlord']);
         $landlord = Landlords::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -33,7 +32,7 @@ class StoreRoomTest extends TestCase
                 'title' => 'Bodega Central Norte',
                 'description' => 'Espacio amplio',
                 'security' => 'Alta',
-                'publication_status' => 'pending'
+                'publication_status' => 'pending',
             ]);
 
         $response->assertStatus(201);
@@ -43,7 +42,6 @@ class StoreRoomTest extends TestCase
             'landlord_id' => $landlord->id,
         ]);
     }
-
 
     /**
      * TC-B-03: Validación de tamaño (size) debe ser numérico
@@ -64,19 +62,20 @@ class StoreRoomTest extends TestCase
             'city' => 'Guayaquil',
             'title' => 'Prueba Fallida',
             'description' => 'Test de validación',
-            'security' => 'Alta'
+            'security' => 'Alta',
         ]);
 
         $response->assertStatus(400);
         $response->assertJsonValidationErrors(['size']);
     }
+
     /**
      * TC-B-04: Seguridad - No se puede crear sin estar autenticado
      */
     public function test_cannot_create_store_room_without_authentication()
     {
         $response = $this->postJson('/api/storeRooms', [
-            'title' => 'Intento fallido'
+            'title' => 'Intento fallido',
         ]);
 
         $response->assertStatus(401);

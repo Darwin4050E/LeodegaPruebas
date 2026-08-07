@@ -15,9 +15,9 @@ class RatingsFactory extends Factory
     {
         return [
             'store_id' => StoreRooms::factory(),
-            'user_id'  => User::factory(),
-            'stars'    => $this->faker->numberBetween(1, 5),
-            'comment'  => $this->faker->sentence(),
+            'user_id' => User::factory(),
+            'stars' => $this->faker->numberBetween(1, 5),
+            'comment' => $this->faker->sentence(),
         ];
     }
 }
