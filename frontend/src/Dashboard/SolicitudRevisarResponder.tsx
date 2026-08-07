@@ -1,9 +1,7 @@
-
-/* eslint-disable sonarjs/cognitive-complexity */
 import React, { useState, useEffect } from 'react';
 import { Check, X, AlertTriangle, MessageSquare } from 'lucide-react';
 import type { Solicitud, ReporteDetalle } from './Interfaces/SolicitudesData';
-import api from '../api/axios';
+import { getReport, updateReportStatus } from '../services/reports';
 
 
 interface SolicitudRevisarResponderProps {
@@ -28,7 +26,7 @@ const SolicitudRevisarResponder: React.FC<SolicitudRevisarResponderProps> = ({
 
   const handleConfirmarResolver = async () => {
     try {
-      await api.patch(`/reports/${solicitud.id}/status`, {
+      await updateReportStatus(solicitud.id, {
         status: "resolved",
       });
 
@@ -43,7 +41,7 @@ const SolicitudRevisarResponder: React.FC<SolicitudRevisarResponderProps> = ({
   useEffect(() => {
     const fetchDetalle = async () => {
       try {
-        const res = await api.get(`/reports/${solicitud.id}`);
+        const res = await getReport(solicitud.id);
         setDetalle(res.data);
       } catch (error) {
         console.error("Error cargando detalle del reporte", error);
@@ -60,8 +58,8 @@ const SolicitudRevisarResponder: React.FC<SolicitudRevisarResponderProps> = ({
     if (!razonRechazo.trim()) return;
 
     try {
-      await api.patch(`/reports/${solicitud.id}/status`, {
-        status: "resolved",
+      await updateReportStatus(solicitud.id, {
+        status: "canceled",
         cancelation_reason: razonRechazo.trim(),
       });
 
