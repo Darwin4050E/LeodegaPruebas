@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
 import './App.css'
 import Header from './Components/Header'
 import Hero from './Components/Hero'
@@ -41,11 +42,11 @@ import SolicitudesL from './Dashboard/SolicitudesL'
 import Protected from './Routes/Protected'
 import Role from './Routes/Role'
 import PagePrincipal from './Dashboard/Tendant/PagePrincipal'
-import MensajesTendant from './Dashboard/Tendant/MensajesTendant'
 import CalendarioTendant from './Dashboard/Tendant/CalendarioTendant'
 
 function App() {
   return (
+    <AuthProvider>
     <Router>
       <Routes>
         <Route path="/register" element={<Register />} />
@@ -112,10 +113,11 @@ function App() {
           </>
         } />
         <Route path="/arrendatario/dashboard" element={<PagePrincipal />} />
-        <Route path="/arrendatario/mensajes" element={<MensajesTendant />} />
+        <Route path="/arrendatario/mensajes" element={<Mensajes />} />
         <Route path="/arrendatario/calendario" element={<CalendarioTendant />} />
       </Routes>
     </Router>
+    </AuthProvider>
   )
 }
 

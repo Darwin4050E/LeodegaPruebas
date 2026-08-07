@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import api from "../api/axios";
+import { resetPassword } from "../services/auth";
+import { asApiError } from "../api/errors";
 import { Lock } from "lucide-react";
 
 const NewPassword: React.FC = () => {
@@ -29,7 +30,7 @@ const NewPassword: React.FC = () => {
     }
 
     try {
-      const res = await api.post("/reset-password", {
+      await resetPassword({
         email,
         token,
         password,
@@ -38,9 +39,9 @@ const NewPassword: React.FC = () => {
 
       setMessage("Tu contraseña ha sido restablecida con éxito.");
       setTimeout(() => navigate("/login"), 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.response?.data?.message || "Error al restablecer la contraseña.");
+      setError(asApiError(err).response?.data?.message || "Error al restablecer la contraseña.");
     } finally {
       setLoading(false);
     }

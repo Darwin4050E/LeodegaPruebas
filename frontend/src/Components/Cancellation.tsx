@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertCircle, User, FileText, DollarSign } from "lucide-react";
+import { AlertCircle, User, DollarSign } from "lucide-react";
 
 export default function Cancellation() {
   return (

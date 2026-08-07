@@ -1,7 +1,8 @@
 import { Bell, ChevronDown } from "lucide-react";
 import React, { useState, useEffect } from 'react';
 import perfil from '../img/perfil.jpg';
-import api from "../api/axios";
+import { getProfile } from "../services/profile";
+import { getUnreadNotificationsCount } from "../services/notifications";
 import NotificationsDropdown from "./NotificatiosnDropdown";
 
 type RoleType = "admin" | "landlord" | "tenant";
@@ -32,8 +33,8 @@ export const HeaderDashboard: React.FC<HeaderDashboardProps> = ({ role }) => {
         const loadData = async () => {
             try {
                 const [profileRes, notifRes] = await Promise.all([
-                    api.get("/profile"),
-                    api.get("/notifications-unread-count"),
+                    getProfile(),
+                    getUnreadNotificationsCount(),
                 ]);
 
                 setNombre(profileRes.data.name);

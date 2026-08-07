@@ -1,27 +1,20 @@
 import { Outlet } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 
 type Props = {
   allowed: Array<"admin" | "landlord">;
 };
 
 export default function Role({ allowed }: Props) {
-  const token = localStorage.getItem("auth_token");
-  const rawUser = localStorage.getItem("auth_user");
+  const { token, user } = useAuth();
 
-  if (!token || !rawUser) {
-    return null; 
-  }
-
-  let user: any;
-  try {
-    user = JSON.parse(rawUser);
-  } catch {
+  if (!token || !user) {
     return null;
   }
 
   const role = user?.role;
 
-  if (!allowed.includes(role)) {
+  if (!allowed.includes(role as "admin" | "landlord")) {
     return (
       <div className="p-6 text-center text-red-600 font-semibold">
         No tienes permisos para acceder a esta sección

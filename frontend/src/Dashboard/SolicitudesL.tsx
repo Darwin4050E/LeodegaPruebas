@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Filter, RotateCcw } from "lucide-react";
-import api from "../api/axios";
+import { getLandlordReservations } from "../services/reservations";
 import type { SolicitudL } from "./Interfaces/SolicitudesLData";
 import SolicitudNuevaL from "./SolicitudNuevaL";
 import SolicitudRevisarResponderL from "./SolicitudRevisarResponderL";
@@ -31,7 +31,7 @@ const SolicitudesL: React.FC = () => {
     useEffect(() => {
         const fetchSolicitudes = async () => {
             try {
-                const { data } = await api.get("/landlord/reservations");
+                const { data } = await getLandlordReservations();
                 setSolicitudes(data);
             } catch (error) {
                 console.error("Error cargando solicitudes landlord", error);
@@ -119,7 +119,7 @@ const SolicitudesL: React.FC = () => {
 
                 <select
                     value={filtroEstado}
-                    onChange={(e) => setFiltroEstado(e.target.value as any)}
+                    onChange={(e) => setFiltroEstado(e.target.value as "" | "Pendiente" | "Confirmada" | "Rechazada")}
                     className="px-4 py-2 bg-white border-0 text-sm font-medium text-gray-700"
                 >
                     <option value="">Estado</option>

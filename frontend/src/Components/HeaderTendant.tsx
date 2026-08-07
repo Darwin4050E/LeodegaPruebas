@@ -2,10 +2,13 @@ import { Bell, LogOut, Menu, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import logo from '../img/LOGO_H_1.png';
 import { Link } from "react-router-dom";
-import api from "../api/axios";
+import { getProfile } from "../services/profile";
+import { getUnreadNotificationsCount } from "../services/notifications";
+import { useAuth } from "../context/useAuth";
 import NotificationsDropdown from "../Dashboard/NotificatiosnDropdown";
 
 const HeaderTendant = () => {
+    const { logout } = useAuth();
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
     const [userName, setUserName] = useState(null);
     const [userLastName, setUserLastName] = useState("");
@@ -21,8 +24,8 @@ const HeaderTendant = () => {
         const loadData = async () => {
             try {
                 const [profileRes, notifRes] = await Promise.all([
-                    api.get("/profile"),
-                    api.get("/notifications-unread-count"),
+                    getProfile(),
+                    getUnreadNotificationsCount(),
                 ]);
 
                 setUserName(profileRes.data.name);
@@ -37,8 +40,7 @@ const HeaderTendant = () => {
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('auth_user');
-        localStorage.removeItem('auth_token');
+        logout();
     };
 
     const navItems = [

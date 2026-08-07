@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import api from "../api/axios";
+import { forgotPassword } from "../services/auth";
+import { asApiError } from "../api/errors";
 import { useNavigate } from "react-router-dom";
 import { Mail } from "lucide-react";
 
@@ -17,10 +18,10 @@ const ResetPassword: React.FC = () => {
     setError("");
 
     try {
-      const res = await api.post("/forgot-password", { email });
+      const res = await forgotPassword(email);
       setMessage(res.data.message || "Hemos enviado un enlace a tu correo.");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Error al enviar el enlace.");
+    } catch (err: unknown) {
+      setError(asApiError(err).response?.data?.message || "Error al enviar el enlace.");
     } finally {
       setLoading(false);
     }

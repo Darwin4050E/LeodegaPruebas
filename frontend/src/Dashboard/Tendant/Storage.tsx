@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import SearchBar from "../../Components/SearchBar";
 import { Heart, ArrowRight, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import api from "../../api/axios";
+import { getStoreRooms } from "../../services/storeRooms";
+import { rateStoreRoom } from "../../services/ratings";
+import { useAuth } from "../../context/useAuth";
+import { asApiError } from "../../api/errors";
 import HeaderTendant from "../../Components/HeaderTendant";
 
 
@@ -29,7 +32,8 @@ const Storage = () => {
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
-  const isLogged = !!localStorage.getItem("auth_token");
+  const { token } = useAuth();
+  const isLogged = !!token;
 
   const DEFAULT_IMAGE =
     "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&h=400&fit=crop";
@@ -37,7 +41,7 @@ const Storage = () => {
   useEffect(() => {
     const fetchWarehouses = async () => {
       try {
-        const res = await api.get("/storeRooms");
+        const res = await getStoreRooms();
 
         const approvedWarehouses = res.data.filter(
           (warehouse: Warehouse) =>
@@ -60,20 +64,21 @@ const Storage = () => {
     if (!stars) return;
 
     try {
-      await api.post("/ratings", {
+      await rateStoreRoom({
         store_id: warehouse.id,
         stars,
         comment: "Calificación desde Storage",
       });
 
       updateWarehouseRating(warehouse.id, stars);
-    } catch (error: any) {
-      if (error.response?.status === 409) {
+    } catch (error: unknown) {
+      const err = asApiError(error);
+      if (err.response?.status === 409) {
         setRatedStores((prev) => new Set(prev).add(warehouse.id));
-      } else if (error.response?.status === 401) {
+      } else if (err.response?.status === 401) {
         alert("Debes iniciar sesión");
       } else {
-        console.error("Error rating:", error.response?.data);
+        console.error("Error rating:", err.response?.data);
       }
     }
   };

@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Search, ChevronDown, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-import api from "../api/axios";
+import { getStoreRoomsByLandlord } from "../services/storeRooms";
+import { useAuth } from "../context/useAuth";
 import BodegaCard from './BodegaCard';
 
 interface StorePrice {
@@ -35,14 +36,14 @@ const BodegasArrendador = () => {
   const [loading, setLoading] = useState(true);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
 
-  const user = JSON.parse(localStorage.getItem("auth_user") || "{}");
+  const { user } = useAuth();
   const landlordId = user?.landlord?.id || "";
 
   useEffect(() => {
     const fetchStore = async () => {
       try {
-        const response = await api.get(`landlords/${landlordId}/storeRooms`);
-        const data = response.data.map((b: any) => ({
+        const response = await getStoreRoomsByLandlord(landlordId);
+        const data = response.data.map((b: Omit<Bodega, 'storePrices'> & { store_prices?: StorePrice[] }) => ({
           ...b,
           storePrices: b.store_prices,
         }));
@@ -155,11 +156,11 @@ const BodegasArrendador = () => {
                   onClick={() => setMostrarMenuOrden(false)}
                 />
                 <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-[2]">
-                  {['newest', 'oldest', 'name'].map((type) => (
+                  {(['newest', 'oldest', 'name'] as const).map((type) => (
                     <button
                       key={type}
                       onClick={() => {
-                        setSortBy(type as any);
+                        setSortBy(type);
                         setMostrarMenuOrden(false);
                       }}
                       className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 ${sortBy === type ? 'text-purple-600 font-medium bg-purple-50' : 'text-gray-700'

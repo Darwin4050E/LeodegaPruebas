@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Check, X, AlertTriangle, MessageSquare } from "lucide-react";
-import api from "../api/axios";
+import { updateReservationStatus } from "../services/reservations";
+import { asApiError } from "../api/errors";
 import type { SolicitudL } from "./Interfaces/SolicitudesLData";
 
 interface Props {
@@ -39,7 +40,7 @@ const SolicitudRevisarResponderL: React.FC<Props> = ({
       setLoading(true);
       setApiError("");
 
-      await api.patch(`/landlord/reservations/${solicitud.id}/status`, {
+      await updateReservationStatus(solicitud.id, {
         status: "confirmed",
       });
 
@@ -48,9 +49,10 @@ const SolicitudRevisarResponderL: React.FC<Props> = ({
 
       setMostrarConfirmarAceptar(false);
       onVolver();
-    } catch (e: any) {
-      const status = e?.response?.status;
-      if (status === 409) setApiError(e?.response?.data?.message || "Conflicto: hay una reserva confirmada en esas fechas.");
+    } catch (e: unknown) {
+      const err = asApiError(e);
+      const status = err.response?.status;
+      if (status === 409) setApiError(err.response?.data?.message || "Conflicto: hay una reserva confirmada en esas fechas.");
       else if (status === 403) setApiError("No autorizado.");
       else setApiError("Error aceptando la solicitud.");
     } finally {
@@ -65,7 +67,7 @@ const SolicitudRevisarResponderL: React.FC<Props> = ({
       setLoading(true);
       setApiError("");
 
-      await api.patch(`/landlord/reservations/${solicitud.id}/status`, {
+      await updateReservationStatus(solicitud.id, {
         status: "canceled",
         cancelation_reason: razonRechazo.trim(),
       });
@@ -74,8 +76,8 @@ const SolicitudRevisarResponderL: React.FC<Props> = ({
       onActualizarSolicitud(updated);
 
       onVolver();
-    } catch (e: any) {
-      const status = e?.response?.status;
+    } catch (e: unknown) {
+      const status = asApiError(e).response?.status;
       if (status === 403) setApiError("No autorizado.");
       else setApiError("Error rechazando la solicitud.");
     } finally {

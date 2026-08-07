@@ -1,6 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import api from "../api/axios";
+import { getStoreRoomDetail, type StoreRoomDetail } from "../services/storeRooms";
+import { getReservedDates, createReservation } from "../services/reservations";
+import { useAuth } from "../context/useAuth";
+import { asApiError } from "../api/errors";
 
 type ReservedRange = { start_date: string; end_date: string };
 
@@ -19,8 +22,9 @@ function isDateBetween(target: string, start: string, end: string) {
 export default function LeodegaUI() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { user } = useAuth();
 
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<StoreRoomDetail | null>(null);
   const [openReserve, setOpenReserve] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -32,8 +36,7 @@ export default function LeodegaUI() {
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    api
-      .get(`/store-rooms/${id}/detail`)
+    getStoreRoomDetail(id as string)
       .then((res) => setData(res.data))
       .catch(console.error);
   }, [id]);
@@ -44,8 +47,7 @@ export default function LeodegaUI() {
     setLoadingRanges(true);
     setError("");
 
-    api
-      .get(`/storeRooms/${id}/reserved-dates`)
+    getReservedDates(id)
       .then((res) => setReservedRanges(res.data || []))
       .catch(() => setReservedRanges([]))
       .finally(() => setLoadingRanges(false));
@@ -101,7 +103,7 @@ export default function LeodegaUI() {
     try {
       setSending(true);
 
-      await api.post("/reservations", {
+      await createReservation({
         store_room_id: Number(id),
         start_date: startDate,
         end_date: endDate,
@@ -113,11 +115,12 @@ export default function LeodegaUI() {
       setEndDate("");
 
       alert("Solicitud enviada");
-    } catch (e: any) {
-      const status = e?.response?.status;
+    } catch (e: unknown) {
+      const err = asApiError(e);
+      const status = err.response?.status;
 
       if (status === 401) setError("Debes iniciar sesión para reservar.");
-      else if (status === 409) setError(e?.response?.data?.message || "Fechas no disponibles.");
+      else if (status === 409) setError(err.response?.data?.message || "Fechas no disponibles.");
       else if (status === 422) setError("Revisa las fechas ingresadas.");
       else setError("Ocurrió un error enviando la solicitud.");
     } finally {
@@ -145,14 +148,7 @@ export default function LeodegaUI() {
 
   };
 
-  const role = (() => {
-    try {
-      const raw = localStorage.getItem("auth_user");
-      return raw ? JSON.parse(raw)?.role : null;
-    } catch {
-      return null;
-    }
-  })();
+  const role = user?.role ?? null;
 
   const handleVolver = () => {
     if (role === "landlord") navigate("/arrendador/bodegas");

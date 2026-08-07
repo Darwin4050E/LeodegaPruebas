@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
+import { login as loginRequest } from "../services/auth";
+import { useAuth } from "../context/useAuth";
+import { asApiError } from "../api/errors";
 import { Link } from 'react-router-dom';
 import facebook from '../img/facebook.png';
 import google from '../img/google.png';
@@ -11,6 +13,7 @@ import leodegalogo from '../img/LOGO_LEODEGAISO.png';
 const Login: React.FC = () => {
 
     const navigate = useNavigate();
+    const { logout, login } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
@@ -23,11 +26,9 @@ const Login: React.FC = () => {
 
         try {
             // limpiamos nuevamente para que no sobreescriba
-            localStorage.removeItem("auth_token");
-            localStorage.removeItem("auth_user");
-            const { data } = await api.post("/login", { email, password });
-            localStorage.setItem("auth_token", data.token);
-            localStorage.setItem("auth_user", JSON.stringify(data.user));
+            logout();
+            const { data } = await loginRequest(email, password);
+            login(data.token, data.user);
 
             if (data.user.role === "landlord") {
                 navigate("/arrendador/bodegas");
@@ -39,10 +40,11 @@ const Login: React.FC = () => {
                 navigate("/");
             }
 
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const err = asApiError(error);
             const msg =
-                error?.response?.data?.message ||
-                error?.response?.data?.error ||
+                err.response?.data?.message ||
+                err.response?.data?.error ||
                 "Error al iniciar sesión";
             setErrorMsg(msg);
         } finally {

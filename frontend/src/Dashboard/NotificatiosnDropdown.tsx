@@ -1,22 +1,26 @@
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
-import { useEffect, useState } from "react";
+import { getNotifications, markNotificationRead, type AppNotification } from "../services/notifications";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 
-const NotificationsDropdown = ({ onUnreadChange }: any) => {
+interface NotificationsDropdownProps {
+    onUnreadChange: Dispatch<SetStateAction<number>>;
+}
+
+const NotificationsDropdown = ({ onUnreadChange }: NotificationsDropdownProps) => {
     const navigate = useNavigate();
-    const [notifications, setNotifications] = useState<any[]>([]);
+    const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
     useEffect(() => {
-        api.get("/notifications").then(res => {
+        getNotifications().then(res => {
             console.log("Notificaciones:", res.data);
             setNotifications(res.data);
         });
     }, []);
 
-    const handleClick = async (n: any) => {
+    const handleClick = async (n: AppNotification) => {
         //  marcar como leída
         if (!n.read_at) {
-            await api.post(`/notifications/${n.id}/read`);
+            await markNotificationRead(n.id);
             onUnreadChange((prev: number) => Math.max(prev - 1, 0));
         }
 

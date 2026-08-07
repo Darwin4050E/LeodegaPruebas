@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProgressBar from "./ProgressBar";
 import FooterNav from "./FooterNav";
-import api from "../../api/axios";
+import { createStoreRoom, uploadStoreRoomPhotos } from "../../services/storeRooms";
+import { useAuth } from "../../context/useAuth";
 import ModalConfirmacion from "../../Components/ModalConfirmacion";
 import leodegalogo from '../../img/LOGO_LEODEGAISO.png';
 
 const PreguntaInicio7 = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [seguridad, setSeguridad] = useState<{
     camara: boolean;
     ruido: boolean;
@@ -63,11 +65,7 @@ const PreguntaInicio7 = () => {
       formData.append("photos[]", blob, `photo_${i}.jpg`);
     }
 
-    await api.post(`/store-rooms/${storeRoomId}/photos`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    await uploadStoreRoomPhotos(storeRoomId, formData);
   };
 
 
@@ -78,7 +76,6 @@ const PreguntaInicio7 = () => {
       setIsProcessing(true);
 
       const data = JSON.parse(localStorage.getItem("optionData") || "{}");
-      const user = JSON.parse(localStorage.getItem("auth_user") || "{}");
 
       const storeRoom = {
         landlord_id: user?.landlord?.id || "",
@@ -103,7 +100,7 @@ const PreguntaInicio7 = () => {
 
       };
 
-      const response = await api.post("/storeRooms", storeRoom);
+      const response = await createStoreRoom(storeRoom);
 
 
       if (response.status === 201 || response.status === 200) {
@@ -119,7 +116,7 @@ const PreguntaInicio7 = () => {
           localStorage.removeItem("optionData");
         }, 1500);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error al crear la bodega:", error);
       alert("Error al enviar la solicitud, vuelve a intentar");
       setIsProcessing(false)

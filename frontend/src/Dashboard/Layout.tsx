@@ -3,12 +3,12 @@ import { Outlet, useLocation } from "react-router-dom";
 
 import { HeaderDashboard } from "./HeaderDashboard";
 import SidebarAdmin from "./SidebarAdmin";
+import { useAuth } from "../context/useAuth";
 
 const Layout: React.FC = () => {
   const [activeItem, setActiveItem] = useState("bodegas");
   const location = useLocation();
-  const rawUser = localStorage.getItem("auth_user");
-  const user = rawUser ? JSON.parse(rawUser) : null;
+  const { user } = useAuth();
 
   const role = user?.role ?? (user?.landlord ? "landlord" : user?.tenant ? "tenant" : null);
 

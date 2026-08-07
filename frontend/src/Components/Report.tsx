@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Upload, AlertTriangle, ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "../api/axios";
+import { createReport } from "../services/reports";
+import { asApiError } from "../api/errors";
 
 
 export default function Report() {
@@ -52,16 +53,15 @@ export default function Report() {
 
     try {
       setLoading(true);
-      await api.post("/reports", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await createReport(formData);
 
       alert("Reporte enviado correctamente");
       
       navigate(-1);
-    } catch (error: any) {
-      console.error(error.response?.data || error);
-      alert(error.response?.data?.message || "Error al enviar reporte");
+    } catch (error: unknown) {
+      const err = asApiError(error);
+      console.error(err.response?.data || error);
+      alert(err.response?.data?.message || "Error al enviar reporte");
     } finally {
       setLoading(false);
     }

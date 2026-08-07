@@ -1,5 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import api from "../api/axios";
+import {
+    getMe,
+    getConversations,
+    getMessages,
+    markConversationRead,
+    sendMessage as sendMessageRequest,
+    createConversation,
+} from "../services/conversations";
+import { getUsers } from "../services/users";
 import { Send, Plus, Search, Paperclip, X } from "lucide-react";
 
 interface User {
@@ -44,22 +52,22 @@ const Mensajes = () => {
     /* ================= LOADERS ================= */
 
     const loadAuthUser = async () => {
-        const res = await api.get("/me");
+        const res = await getMe();
         setAuthUser(res.data.user);
     };
 
     const loadConversations = async () => {
-        const res = await api.get("/conversations");
+        const res = await getConversations();
         setConversations(res.data);
     };
 
     const loadMessages = async (id: number) => {
-        const res = await api.get(`/conversations/${id}/messages`);
+        const res = await getMessages(id);
         setMessages(res.data.data);
     };
 
     const loadUsers = async () => {
-        const res = await api.get("/user");
+        const res = await getUsers();
         setUsers(res.data);
     };
 
@@ -89,7 +97,7 @@ const Mensajes = () => {
     const openConversation = async (conv: Conversation) => {
         setActiveConversation(conv);
         await loadMessages(conv.id);
-        await api.post(`/conversations/${conv.id}/read`);
+        await markConversationRead(conv.id);
         loadConversations();
     };
 
@@ -101,11 +109,7 @@ const Mensajes = () => {
         formData.append("body", messageText);
         if (file) formData.append("file", file);
 
-        await api.post(
-            `/conversations/${activeConversation.id}/messages`,
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" } }
-        );
+        await sendMessageRequest(activeConversation.id, formData);
 
         setMessageText("");
         removeFile();
@@ -114,7 +118,7 @@ const Mensajes = () => {
     };
 
     const startConversation = async (userId: number) => {
-        const res = await api.post("/conversations", { user_id: userId });
+        const res = await createConversation(userId);
         setShowNewChat(false);
         setActiveConversation(res.data);
         loadMessages(res.data.id);

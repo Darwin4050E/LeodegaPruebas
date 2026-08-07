@@ -7,10 +7,13 @@ describe('Login', () => {
     cy.get('input[type="email"]').type('admin@leodega.com')
     cy.get('input[type="password"]').type('admin123')
 
-    cy.contains('Iniciar Sesión').click()
+    // El selector por texto es ambiguo: "Iniciar Sesión" también aparece en el
+    // <h2> de la página, y cy.contains() matchea ese primero (nunca el botón),
+    // por lo que el submit nunca se dispara. Se acota a <button> para desambiguar.
+    cy.contains('button', 'Iniciar Sesión').click()
 
     // ⏳ espera la redirección (NO la request)
-    cy.location('pathname', { timeout: 200000 })
+    cy.location('pathname', { timeout: 20000 })
       .should('eq', '/admin/bodegas')
 
     // ✅ opcional: token guardado

@@ -3,6 +3,7 @@ import { SidebarItem } from "./SidebarItem";
 import { useNavigate } from 'react-router-dom';
 import logoh1 from '../img/LOGO_H_1.png';
 import { Menu, X } from 'lucide-react';
+import { useAuth } from '../context/useAuth';
 
 interface SidebarAdminProps {
     readonly activeItem: string;
@@ -16,6 +17,7 @@ export default function SidebarAdmin(
     const { activeItem, setActiveItem, role } = props;
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const navigate = useNavigate();
+    const { logout } = useAuth();
     const basePath =
         role === "admin"
             ? "/admin"
@@ -169,8 +171,7 @@ export default function SidebarAdmin(
                         label="Cerrar sesión"
                         active={activeItem === 'logout'}
                         onClick={() => handleItemClick(() => {
-                            localStorage.removeItem('auth_user');
-                            localStorage.removeItem('auth_token');
+                            logout();
                             setActiveItem('logout');
                             navigate('/login', { replace: true });
                         })}
