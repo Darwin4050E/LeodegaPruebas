@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTenantRequest;
+use App\Http\Requests\UpdateTenantRequest;
 use App\Models\Tenants;
 use Illuminate\Http\Request;
 
@@ -20,22 +22,12 @@ class TenantsController extends ApiController
 
     public function store(Request $request)
     {
-        $rules = [
-            'search_preference' => 'required|string',
-            'user_id' => 'required|exists:users,id',
-        ];
-
-        return $this->storeModel($request, Tenants::class, $rules);
+        return $this->storeModel($request, Tenants::class, (new StoreTenantRequest)->rules());
     }
 
     public function update(Request $request, $id)
     {
-        $rules = [
-            'search_preference' => 'sometimes|required|string',
-            'user_id' => 'sometimes|required|exists:users,id',
-        ];
-
-        return $this->updateModel($request, Tenants::class, $id, $rules);
+        return $this->updateModel($request, Tenants::class, $id, (new UpdateTenantRequest)->rules());
     }
 
     public function destroy($id)

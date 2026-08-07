@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreNotificationRequest;
 use App\Models\Notifications;
-use App\NotificationType;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rules\Enum;
 
 class NotificationsController extends Controller
 {
@@ -18,16 +16,8 @@ class NotificationsController extends Controller
             ->get();
     }
 
-    public function store(Request $request)
+    public function store(StoreNotificationRequest $request)
     {
-        $request->validate([
-            'receiver_id' => 'required|exists:users,id',
-            'type' => ['required', new Enum(NotificationType::class)],
-            'title' => 'required|string|max:100',
-            'body' => 'nullable|string',
-            'data' => 'nullable|array',
-        ]);
-
         return Notifications::create([
             'sender_id' => auth()->id(),
             'receiver_id' => $request->receiver_id,
@@ -47,10 +37,9 @@ class NotificationsController extends Controller
         $notification->update(['is_read' => true]);
 
         return response()->json([
-            'message' => 'Notificación marcada como leída'
+            'message' => 'Notificación marcada como leída',
         ]);
     }
-
 
     public function unreadCount()
     {
@@ -59,7 +48,7 @@ class NotificationsController extends Controller
             ->count();
 
         return response()->json([
-            'count' => $count
+            'count' => $count,
         ]);
     }
 }

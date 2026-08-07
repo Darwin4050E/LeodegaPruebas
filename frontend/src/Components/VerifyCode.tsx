@@ -1,23 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import logoh1 from '../img/LOGO_H_1.png'
 import logimage from '../img/logimage.png'
 
 const VerifyCode = () => {
-    const navigate = useNavigate();
     const [code, setCode] = useState('');
-    const [sendCode, setSendCode] = useState('');
     const [showCode, setShowCode] = useState(false);
-
-    const handleSubmit = (e: React.FormEvent) => {
-        if (code !== sendCode) {
-            alert("Codigo incorrecto");
-            return;
-        }
-        e.preventDefault();
-        console.log('Cuenta Creada');
-    };
 
     return (
         <div className="min-h-screen flex flex-col bg-white">

@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreStoreRoomRequest;
+use App\Http\Requests\UpdateStoreRoomRequest;
 use App\Models\Landlords;
 use App\Models\Ratings;
 use App\Models\StoreRooms;
-use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class StoreRoomsController extends ApiController
@@ -18,6 +19,7 @@ class StoreRoomsController extends ApiController
                 $ratings = Ratings::where('store_id', $room->id);
                 $avg = round($ratings->avg('stars'), 1);
                 $count = $ratings->count();
+
                 return [
                     'id' => $room->id,
                     'title' => $room->title,
@@ -37,12 +39,11 @@ class StoreRoomsController extends ApiController
                     'rating_avg' => $avg,
                     'rating_count' => $count,
                     'image' => $room->storePhotos->first()
-                        ? asset('storage/' . $room->storePhotos->first()->photo_url)
+                        ? asset('storage/'.$room->storePhotos->first()->photo_url)
                         : null,
                 ];
             });
     }
-
 
     public function show($id)
     {
@@ -51,42 +52,12 @@ class StoreRoomsController extends ApiController
 
     public function store(Request $request)
     {
-        $rules = [
-            'landlord_id' => 'required|exists:landlords,id',
-            'room_type' => 'required|in:habitacion,garaje,contenedor,sotano,atico,bodega',
-            'storage_type' => 'required|in:completa,privado,compartido',
-            'direction' => 'required|string',
-            'city' => 'required|string',
-            'size' => 'required|numeric',
-            'title' => 'required|string',
-            'description' => 'required|string',
-            'security' => 'required|string',
-            'publication_status' => 'in:pending,approved,rejected',
-            'publication_date' => 'date',
-        ];
-
-        return $this->storeModel($request, StoreRooms::class, $rules);
+        return $this->storeModel($request, StoreRooms::class, (new StoreStoreRoomRequest)->rules());
     }
 
     public function update(Request $request, $id)
     {
-        $rules = [
-            'landlord_id' => 'exists:landlords,id',
-            'room_type' => 'in:habitacion,garaje,contenedor,sotano,atico, bodega',
-            'storage_type' => 'in:complet,privado,compartido',
-            'direction' => 'string',
-            'city' => 'string',
-            'size' => 'numeric',
-            'title' => 'string',
-            'description' => 'string',
-            'security' => 'string',
-            'publication_status' => 'in:pending,approved,rejected',
-            'publication_date' => 'date',
-        ];
-
-       
-
-        return $this->updateModel($request, StoreRooms::class, $id, $rules);
+        return $this->updateModel($request, StoreRooms::class, $id, (new UpdateStoreRoomRequest)->rules());
     }
 
     public function destroy($id)
@@ -117,7 +88,7 @@ class StoreRoomsController extends ApiController
                     'storage_type' => $room->storage_type,
                     'room_type' => $room->room_type,
                     'store_prices' => $room->storePrices,
-                    'image' => $firstPhoto ? asset('storage/' . $firstPhoto->photo_url) : null,
+                    'image' => $firstPhoto ? asset('storage/'.$firstPhoto->photo_url) : null,
                 ];
             });
 
@@ -133,10 +104,10 @@ class StoreRoomsController extends ApiController
         $room = StoreRooms::with([
             'storePrices',
             'storePhotos',
-            'landlord.user'
+            'landlord.user',
         ])->find($id);
 
-        if (!$room) {
+        if (! $room) {
             return response()->json(['message' => 'Bodega no encontrada'], 404);
         }
 
@@ -153,7 +124,7 @@ class StoreRoomsController extends ApiController
 
             'prices' => $room->storePrices,
 
-            'photos' => $room->storePhotos->map(fn($p) => asset('storage/' . $p->photo_url)),
+            'photos' => $room->storePhotos->map(fn ($p) => asset('storage/'.$p->photo_url)),
 
             'landlord' => [
                 'id' => $room->landlord->id,

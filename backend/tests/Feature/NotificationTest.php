@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Notifications;
-use App\Services\NotificationService;
 use App\Enums\NotificationType;
+use App\Models\Notifications;
+use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -54,6 +54,38 @@ class NotificationTest extends TestCase
         $this->assertDatabaseHas('notifications', [
             'id' => $notification->id,
             'is_read' => true,
+        ]);
+    }
+
+    /**
+     * Fase 1: dos bugs bloqueaban este endpoint hasta ahora:
+     *  1. La validación de `receiver_id` usaba `exists:users,id` (tabla
+     *     muerta, hallazgo #4 de la matriz de riesgo) en vez de `user,id`.
+     *  2. El `use App\NotificationType;` apuntaba a un namespace inexistente
+     *     — la clase real es `App\Enums\NotificationType` — así que la
+     *     petición fallaba con un error fatal de clase no encontrada.
+     * Ambos corregidos; este test prueba que el endpoint HTTP real funciona,
+     * no solo NotificationService::send() usado directamente (como en el test
+     * de arriba).
+     */
+    public function test_store_creates_notification_via_http_endpoint()
+    {
+        $sender = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $response = $this->actingAs($sender, 'sanctum')->postJson('/api/notifications', [
+            'receiver_id' => $receiver->id,
+            'type' => 'message',
+            'title' => 'Tienes un mensaje nuevo',
+        ]);
+
+        // Laravel devuelve 201 automáticamente al retornar un modelo Eloquent
+        // recién creado (wasRecentlyCreated) directamente desde el controlador.
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('notifications', [
+            'sender_id' => $sender->id,
+            'receiver_id' => $receiver->id,
+            'title' => 'Tienes un mensaje nuevo',
         ]);
     }
 }
